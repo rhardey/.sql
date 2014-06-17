@@ -25,7 +25,7 @@ begin
                 object_type,
                 last_ddl_time,
                 status
-         from   all_objects
+         from   dba_objects
          where  object_name like '%'||:objectname||'%'
          order by owner, object_type, object_name
          ;
@@ -35,7 +35,7 @@ begin
                 object_type,
                 last_ddl_time,
                 status
-         from   all_objects
+         from   dba_objects
          where  owner = :userid
          and    object_name like '%'||:objectname||'%'
          order by object_type, object_name

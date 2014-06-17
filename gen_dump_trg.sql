@@ -14,10 +14,14 @@ begin dbms_output.put_line('column trigger_body format a260');end; -- this shoul
 /
 select 
        'spool '||lower(trigger_name)||'.trg'
-       ||chr(10)||chr(13)
+       ||chr(13)||chr(10)
+       ||'create or replace trigger '||trigger_name
+       ||chr(13)||chr(10)
+       ||decode(
+       ||chr(13)||chr(10)
        ||'select trigger_body from all_triggers where owner = '''||owner
        ||''' and trigger_name = '''||trigger_name||''';'
-       ||chr(10)||chr(13)
+       ||chr(13)||chr(10)
        ||'spool off'
        ||chr(13)||chr(10)
        ||'ho u:\bin\trim.bat '
