@@ -1,4 +1,5 @@
-define _editor = gvim
+-- Plugins are soooooo slow!
+define _editor = "gvim --noplugin"
 
 --define userdesc='not connected'
 --define dbinstdesc=''
@@ -11,7 +12,7 @@ set numwidth 9
 set linesize 160
 set long 1000
 set pagesize 400
-set serveroutput on
+set serveroutput on size unlimited
 
 set time on 
 
