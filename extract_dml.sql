@@ -6,17 +6,20 @@ spool extract_recs.sql
 declare
    ----
    -- This little piece of code will hopefully generate insert statements for a
-   -- table, passed in as the first parameter.
+   -- table.
    --
-   -- TODO: Implement a WHERE clause, support more data types.
+   -- Usage: @extract_dml <owner> <table name> <"quoted" where clause>
    ----
+
+   -- Table type to hold each line.
+   type line_type is table of varchar2(255) index by binary_integer;
+
+   t_col_lines line_type;
+   t_val_lines line_type;
 
    v_owner all_tab_cols.owner%type := upper('&1');
    v_table_name all_tab_cols.table_name%type := upper('&2');
    v_where_clause varchar2(32767) := '&3';
-
-   v_columns varchar2(32767) := '';
-   v_values varchar2(32767) := '';
 
    v_insert_script varchar2(512) := 'ins_'||lower(v_table_name)||'.sql';
 
@@ -61,12 +64,30 @@ declare
       return quote('''')||'||'||'replace('||p_col_name||', '||quote('''')||', '||quote('''''')||')||'||quote('''')||'';
    end;
 
+   procedure output(t_lines line_type)
+   is
+   begin
+      for i in 1..t_lines.last
+      loop
+         dbms_output.put_line(t_lines(i));
+      end loop;
+   end;
+
+   procedure output_quoted(t_lines line_type)
+   is
+   begin
+      for i in 1..t_lines.last
+      loop
+         dbms_output.put_line(quote(t_lines(i))||'||');
+      end loop;
+   end;
+
 begin
 
    dbms_output.put_line('spool '||v_insert_script);
 
    dbms_output.put_line('select ');
-   dbms_output.put_line('''insert into '||lower(v_table_name));
+   dbms_output.put_line('''insert into '||lower(v_table_name)||'''||');
 
    for rec in c_dml
    loop
@@ -77,30 +98,46 @@ begin
 
          case rec.data_type
          when 'NUMBER' then v_column_value := write_number(rec.column_name);
+         --when 'NUMBER' then null;
          when 'DATE' then v_column_value := write_date(rec.column_name);
+         --when 'DATE' then null;
          when 'VARCHAR2' then v_column_value := write_string(rec.column_name);
          when 'CHAR' then v_column_value := write_string(rec.column_name);
          else raise_application_error(-20001, 'Unhandled data type: '||rec.data_type);
          end case;
 
-         if c_dml%rowcount = 1
+         if v_column_value is not null
          then
-            v_columns := '('||rec.column_name;
-            v_values := v_column_value;
-         else
-            v_columns := v_columns||', '||rec.column_name;
-            v_values := v_values||'||'', ''||'||chr(10)||v_column_value;
+            if t_col_lines.count = 0
+            then
+               t_col_lines(1) := rec.column_name;
+               t_val_lines(1) := v_column_value;
+            else
+               t_col_lines(t_col_lines.last+1) := ', '||rec.column_name;
+               t_val_lines(t_val_lines.last+1) := '||'', ''||'||chr(10)||v_column_value;
+            end if;
          end if;
 
       end;
 
    end loop;
 
-   dbms_output.put_line(v_columns||')');
-   dbms_output.put_line('values (''||'||v_values||'||'');''');
+   -- Output column list
+   dbms_output.put_line(quote('(')||'||');
+   output_quoted(t_col_lines);
+   dbms_output.put_line(''') values (''||');
+
+   -- Output values list
+   output(t_val_lines);
+   dbms_output.put_line('||'');''');
+
+   -- From clause
    dbms_output.put_line('from '||v_owner||'.'||v_table_name);
+
+   -- Where clause
    if v_where_clause is not null
    then
+      dbms_output.put_line('where ');
       dbms_output.put_line(v_where_clause);
    end if;
    dbms_output.put_line('/');
