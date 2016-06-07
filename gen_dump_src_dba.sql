@@ -3,6 +3,7 @@ set pagesize 0
 set serverout on size 1000000
 set verify off
 set termout off
+set trimspool on
 
 -- this should get most lines that would otherwise wrap
 set linesize 512
@@ -23,7 +24,6 @@ select  -- For objects where case is not important in their names.
        ||chr(13)||chr(10)
        ||'spool off'
        ||chr(13)||chr(10)
-       ||'ho \bin\trim.bat '
        ||lower(object_name)||'.'||decode(object_type,'FUNCTION','fun','PROCEDURE','prc','PACKAGE','pks','PACKAGE BODY','pkb', 'TYPE', 'typ')
 from dba_objects
 where owner = upper('&1')
@@ -45,7 +45,6 @@ select -- For objects where case is important in their names.
        ||chr(13)||chr(10)
        ||'spool off'
        ||chr(13)||chr(10)
-       ||'ho \bin\trim.bat '
        ||object_name||'.'||decode(object_type,'FUNCTION','fun','PROCEDURE','prc','PACKAGE','pks','PACKAGE BODY','pkb', 'TYPE', 'typ')
 from dba_objects
 where owner = upper('&1')
