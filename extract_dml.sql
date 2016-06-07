@@ -2,6 +2,7 @@ set feedback off
 set pagesize 0
 set linesize 4000
 set verify off
+set trimspool on
 spool extract_recs.sql
 declare
    ----
@@ -19,7 +20,7 @@ declare
 
    v_owner all_tab_cols.owner%type := upper('&1');
    v_table_name all_tab_cols.table_name%type := upper('&2');
-   v_where_clause varchar2(32767) := '&3';
+   v_where_clause varchar2(32767) := trim('&3');
 
    v_insert_script varchar2(512) := 'ins_'||lower(v_table_name)||'.sql';
 
@@ -84,10 +85,11 @@ declare
 
 begin
 
+   dbms_output.put_line('set trimspool on');
    dbms_output.put_line('spool '||v_insert_script);
 
    dbms_output.put_line('select ');
-   dbms_output.put_line('''insert into '||lower(v_table_name)||'''||');
+   dbms_output.put_line('''insert into '||lower(v_owner)||'.'||lower(v_table_name)||'''||');
 
    for rec in c_dml
    loop
@@ -143,7 +145,6 @@ begin
    dbms_output.put_line('/');
 
    dbms_output.put_line('spool off');
-   dbms_output.put_line('ho \bin\trim.bat '||v_insert_script);
 
 end;
 /
