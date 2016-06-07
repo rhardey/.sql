@@ -1,5 +1,6 @@
 -- Plugins are soooooo slow!
-define _editor = "gvim --noplugin"
+--define _editor = "gvim --noplugin"
+define _editor = "gvim"
 
 --define userdesc='not connected'
 --define dbinstdesc=''
