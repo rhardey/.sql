@@ -9,7 +9,7 @@ declare
    -- This little piece of code will hopefully generate insert statements for a
    -- table.
    --
-   -- Usage: @extract_dml <owner> <table name> <"quoted" where clause>
+   -- Usage: @extract_dml <owner> <table name> <"quoted" where clause> <comma separated list of column names to exclude>
    ----
 
    -- Table type to hold each line.
@@ -21,6 +21,7 @@ declare
    v_owner all_tab_cols.owner%type := upper('&1');
    v_table_name all_tab_cols.table_name%type := upper('&2');
    v_where_clause varchar2(32767) := trim('&3');
+   v_exclude_columns varchar2(32767) := upper(translate(',&4,', ', ', ','));
 
    v_insert_script varchar2(512) := 'ins_'||lower(v_table_name)||'.sql';
 
@@ -33,6 +34,7 @@ declare
        where c.owner = v_owner
          and c.table_name = v_table_name
          and c.virtual_column != 'YES'
+         and instr(v_exclude_columns, ','||c.column_name||',') = 0
        order by c.column_id;
 
    function quote(p_string varchar2)
