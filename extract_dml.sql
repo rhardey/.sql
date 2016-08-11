@@ -35,6 +35,7 @@ declare
          and c.table_name = v_table_name
          and c.virtual_column != 'YES'
          and instr(v_exclude_columns, ','||c.column_name||',') = 0
+         and c.user_generated = 'YES'
        order by c.column_id;
 
    function quote(p_string varchar2)
