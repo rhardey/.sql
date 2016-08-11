@@ -32,7 +32,7 @@ begin
                 column_name,
                 data_type||decode(data_type, 'DATE', '', '('||to_char(data_length)||')') type,
                 data_default
-         from   dba_tab_columns
+         from   all_tab_columns
          where  column_name like '%'||:colname||'%'
          and    owner not in ('SYS','SYSTEM')
          order by owner,table_name,column_name;
@@ -42,7 +42,7 @@ begin
                 column_name,
                 data_type||decode(data_type, 'DATE', '', '('||to_char(data_length)||')') type,
                 data_default
-         from   dba_tab_columns
+         from   all_tab_columns
          where  owner = :userid
          and    column_name like '%'||:colname||'%'
          order by table_name,column_name;
