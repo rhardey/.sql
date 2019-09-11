@@ -3,7 +3,7 @@ set pagesize 0
 set serverout on size 1000000
 set verify off
 set termout off
-set trimspool off
+set trimspool on
 
 -- this should get most lines that would otherwise wrap
 set linesize 512

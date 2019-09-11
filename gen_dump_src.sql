@@ -1,3 +1,4 @@
+set trimspool on
 set feedback off
 set verify off
 set pagesize 0
